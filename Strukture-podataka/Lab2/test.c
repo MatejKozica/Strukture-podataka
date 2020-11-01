@@ -1,56 +1,5 @@
-#include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
-
-#define MAX_LENGTH 50
-
-typedef struct _node * Position;
-
-typedef struct _student{
-  char firstName[MAX_LENGTH];
-  char lastName[MAX_LENGTH];
-  int yearOfBirth;
-} Student;
-
-typedef struct _node{
-  Student student;
-  Position next;
-} Node;
-
-
-int printList(Node *);
-int insertBegin(Node *);
-int insertEnd(Node *);
-int freeList(Node *);
-Node * findSurname(Node *, char *);
-Node * findSurnameBefore(Node *, char *);
-int deleteNode(Node *, char *);
-int insert( Node *);
-int scanStudent(Node *);
-
-
-int main(){
-  char name[MAX_LENGTH];
-  Node * head = (Node *)malloc(sizeof(Node));
-  head->next = NULL;
-
-  insertBegin(head);
-  printList(head->next);
-  insertEnd(head);
-  printList(head->next);
-  printf("Iza kojeg studenta zelite unijeti novog studenta: \n");
-  scanf(" %s", name);
-  insert(findSurname(head, name));
-  printList(head->next);
-  printf("Prije kojeg studenta zelite unijeti novog studenta: \n");
-  scanf(" %s", name);
-  insert(findSurnameBefore(head, name));
-  printList(head->next);
-
-
-  freeList(head);
-  return 0;
-}
+#include "test.h"
 
 int printList(Node * point){
   
@@ -143,8 +92,3 @@ int insert(Node * wanted){
 }
 
 int scanStudent(Node * point){
-  printf("Unesi ime, prezime i godinu rodenja studenta: \n");
-  scanf(" %s %s %d", point->student.firstName, point->student.lastName, &point->student.yearOfBirth);
-  printf("\n");
-  return 0;
-}
