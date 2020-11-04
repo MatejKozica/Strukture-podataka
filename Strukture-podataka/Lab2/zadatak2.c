@@ -19,34 +19,28 @@ typedef struct _node{
 
 
 int printList(Node *);
-int insertBegin(Node *);
-int insertEnd(Node *);
+int insertBegin(Node *, int, Node *);
+int insertEnd(Node *, int, Node *);
 int freeList(Node *);
 Node * findSurname(Node *, char *);
 Node * findSurnameBefore(Node *, char *);
 int deleteNode(Node *, char *);
 int insert( Node *);
 int scanStudent(Node *);
-
+int countRows(char *);
+int readFromFile(char *, Node *);
+int writeIntoFile(char *, Node *);
+int sortList(Node *);
 
 int main(){
+  int counter = 0;
   char name[MAX_LENGTH];
   Node * head = (Node *)malloc(sizeof(Node));
   head->next = NULL;
 
-  insertBegin(head);
-  printList(head->next);
-  insertEnd(head);
-  printList(head->next);
-  printf("Iza kojeg studenta zelite unijeti novog studenta: \n");
-  scanf(" %s", name);
-  insert(findSurname(head, name));
-  printList(head->next);
-  printf("Prije kojeg studenta zelite unijeti novog studenta: \n");
-  scanf(" %s", name);
-  insert(findSurnameBefore(head, name));
-  printList(head->next);
 
+  readFromFile("input.txt", head);
+  printList(head->next);
 
   freeList(head);
   return 0;
@@ -62,26 +56,32 @@ int printList(Node * point){
   return 0;
 }
 
-int insertBegin(Node * point){
+int insertBegin(Node * point, int scanFlag, Node * info){
   Node * newNode = (Node *)malloc(sizeof(Node));
   if(newNode == NULL){
     return -1;
   }
   
-  scanStudent(newNode);
+  if(scanFlag == 1){
+    scanStudent(newNode);
+  }
   
+  else if(scanFlag == 0){
+    newNode->student = info->student;
+  }
+
   newNode->next = point->next;
   point->next = newNode;
 
   return 0;
 }
 
-int insertEnd(Node * point){
+int insertEnd(Node * point, int scanFlag, Node * info){
   while(point->next != NULL){
     point = point->next;
   }
   
-  insertBegin(point);
+  insertBegin(point, scanFlag, info);
 
   return 0;
 }
@@ -146,5 +146,74 @@ int scanStudent(Node * point){
   printf("Unesi ime, prezime i godinu rodenja studenta: \n");
   scanf(" %s %s %d", point->student.firstName, point->student.lastName, &point->student.yearOfBirth);
   printf("\n");
+  return 0;
+}
+
+int countRows(char * file){
+  int counter = 0;
+  char c;
+  FILE * students = fopen(file, "r");
+
+  while((c = fgetc(students)) != EOF){
+    if(c == '\n'){
+      counter++;
+    }
+  }
+
+  fclose(students);
+
+  return counter;
+}
+
+int readFromFile(char * file, Node * point){
+  int rows, i = 0;
+  FILE * students = fopen(file, "r");
+  rows = countRows(file);
+  
+  Node * temp = (Node *)malloc(sizeof(Node));
+
+  for(i = 0; i < rows; i++){
+    fscanf(students, " %s %s %d", temp->student.firstName, temp->student.lastName, &temp->student.yearOfBirth);
+    insertEnd(point, 0, temp);
+  }
+  
+  free(temp);
+  fclose(students);
+  return 0;
+}
+
+int writeIntoFile(char * file, Node * point){
+  FILE * students = fopen(file, "w");
+  while(point != NULL){
+    fprintf(students, "%s %s %d\n", point->student.firstName, point->student.lastName, point->student.yearOfBirth);
+    point = point->next;
+  }
+  return 0;
+}
+
+
+int sortList(Node * point){
+  Node * pointer;
+  Node * beforePointer;
+  Node * temp;
+  Node * sorted = NULL;
+  
+  while(point->next != sorted){
+    beforePointer = point;
+    pointer = point->next;
+    while(pointer->next != sorted){
+      if(strcmp(pointer->student.lastName, pointer->next->student.lastName) > 0){
+        temp = pointer->next;
+        beforePointer->next = temp;
+        pointer->next = temp->next;
+        temp->next = pointer;
+        pointer = temp;
+      }
+      beforePointer = pointer;
+      pointer = pointer->next;
+    }
+    sorted = pointer;
+  }
+
   return 0;
 }
