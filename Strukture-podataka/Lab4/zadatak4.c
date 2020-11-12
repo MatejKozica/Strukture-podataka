@@ -24,20 +24,18 @@ int freeList(Node * point);
 int main(){
   Position head1 = (Position)malloc(sizeof(Node));
   Position head2 = (Position)malloc(sizeof(Node));
+  Position head3 = (Position)malloc(sizeof(Node));
   
   head1->next = NULL;
   head2->next = NULL;
+  head3->next = NULL;
 
   readFromFile("input.txt", head1, head2);
   
   printList(head1->next);
   printList(head2->next);
-  printf("\n\nSum result:\n");
-  printList(sumPolynome(head1->next, head2->next)->next);
-  printf("\nSecond:\n");
-  printList(head2->next);
   printf("\n\nMultiply result:\n");
-  multiplyPolynome(head1->next, head2->next);
+  printList(multiplyPolynome(head1->next, head2->next)->next);
  
   return 0;
 }
@@ -56,7 +54,6 @@ int readFromFile(char * file, Position firstHead, Position secondHead){
     }
   }
 
-  free(tempHead);
   fclose(openedFile);
 }
 
@@ -80,6 +77,9 @@ int insert(Position point, int coefficient, int power){
 }
 
 int printList(Position point){
+  if(point == NULL){
+    printf("List is empty");
+  }
   while(point != NULL){
     printf("%dx%d\t", point->data.coefficient, point->data.power);
     point = point->next;
@@ -91,22 +91,36 @@ int printList(Position point){
 Position sumPolynome(Position first, Position second){
   Position result = (Position)malloc(sizeof(Node));
   result->next = NULL;
-  copyList(first, result);
 
-  Position resultHead = result;
-  result = result->next;
-  
-  while(second != NULL){
-    if(second->data.power == result->data.power){
-      result->data.coefficient += second->data.coefficient;
-      result = result->next;
+  while(first != NULL && second != NULL){
+    if(first->data.power == second->data.power){
+      insert(result, first->data.coefficient + second->data.coefficient, first->data.power);
+      first = first->next;
+      second = second->next;
+     
     }
-    else{
-      insert(resultHead, second->data.coefficient, second->data.power);
+    else if(first->data.power < second->data.power){
+      insert(result, second->data.coefficient, second->data.power);
+      second = second->next;
     }
-    second = second->next;
+    else if(first->data.power > second->data.power){
+      insert(result, first->data.coefficient, first->data.power);
+      first = first->next;
+    }
   }
-  result = resultHead;
+  if(first == NULL){
+    while(second != NULL){
+      insert(result, second->data.coefficient, second->data.power);
+      second = second->next;
+    }
+  }
+  
+  else if(second == NULL){
+    while(first != NULL){
+      insert(result, first->data.coefficient, first->data.power);
+      first = first->next;
+    }
+  }
 
   return result;
 }
@@ -122,16 +136,20 @@ int copyList(Position first, Position second){
 Position multiplyPolynome(Position first, Position second){
   Position result = (Position)malloc(sizeof(Node));
   result->next = NULL;
-  
+
   Position resultHead = result;
   Position secondHead = second;
 
   while(first != NULL){
+    Position temp= (Position)malloc(sizeof(Node));
+    temp->next = NULL;
     while(second != NULL){
-      printf("1\t");
+      insert(temp, first->data.coefficient * second->data.coefficient, first->data.power + second->data.power);
       second  = second->next;
     }
-    printf("\n");
+    result = sumPolynome(result->next, temp->next);
+    freeList(temp);
+    
     first = first->next;
     second = secondHead;
   }
@@ -140,11 +158,13 @@ Position multiplyPolynome(Position first, Position second){
 }
 
 int freeList(Position point){
+  Position pointHead = point;
   Position temp;
-  while(point->next != NULL){
+  while(point != NULL){
     temp = point;
     point = point->next;
     free(temp);
   }
+  pointHead->next = NULL;
   return 0;
 }
