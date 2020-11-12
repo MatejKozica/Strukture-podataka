@@ -14,6 +14,7 @@ Position listIntersection(Position firstHead, Position secondHead);
 Position listUnion(Position firstHead, Position secondHead);
 
 int main(){
+  int a;
   Position head1 = (Position)malloc(sizeof(Node));
   Position head2 = (Position)malloc(sizeof(Node));
 
@@ -21,18 +22,26 @@ int main(){
   head2->next = NULL;
 
   printf("Prvi niz: \n");
-  sortInput(head1, 1, 0);
-  sortInput(head1, 1, 0);
-  sortInput(head1, 1, 0);
-  sortInput(head1, 1, 0);
+  printf("Unesite 0 za kraj \n");
+
+  scanf("%d", &a);
+  while(a != 0){
+    sortInput(head1, 0, a);
+    scanf("%d", &a);
+  }
 
   printf("Drugi niz: \n");
-  sortInput(head2, 1, 0);
-  sortInput(head2, 1, 0);
-  sortInput(head2, 1, 0);
-  sortInput(head2, 1, 0);
-  
+  printf("Unesite 0 za kraj \n");
+
+  scanf("%d", &a);
+  while(a != 0){
+    sortInput(head2, 0, a);
+    scanf("%d", &a);
+  }
+
+  printf("List1: \n");
   printList(head1->next);
+  printf("List2: \n");
   printList(head2->next);
 
   printf("listIntersection: \n");
