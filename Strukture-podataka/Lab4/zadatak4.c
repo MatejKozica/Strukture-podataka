@@ -24,22 +24,17 @@ int freeList(Node * point);
 int main(){
   Position head1 = (Position)malloc(sizeof(Node));
   Position head2 = (Position)malloc(sizeof(Node));
-  Position head3 = (Position)malloc(sizeof(Node));
-  Position head4 = (Position)malloc(sizeof(Node));
   
   head1->next = NULL;
   head2->next = NULL;
-  head3->next = NULL;
-  head4->next = NULL;
 
   readFromFile("input.txt", head1, head2);
   
   printList(head1->next);
-  printf("\n");
   printList(head2->next);
   printf("\n\nSum result:\n");
   printList(sumPolynome(head1->next, head2->next)->next);
-  printf("\n");
+  printf("\nSecond:\n");
   printList(head2->next);
   printf("\n\nMultiply result:\n");
   multiplyPolynome(head1->next, head2->next);
@@ -89,7 +84,7 @@ int printList(Position point){
     printf("%dx%d\t", point->data.coefficient, point->data.power);
     point = point->next;
   }
-
+  printf("\n");
   return 0;
 }
 
@@ -111,7 +106,6 @@ Position sumPolynome(Position first, Position second){
     }
     second = second->next;
   }
-
   result = resultHead;
 
   return result;
