@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define MAX 50
 
 typedef struct _node * Position;
@@ -75,23 +76,17 @@ int openFile(char * file, char * expression){
 
 float calculate(Position head, char * expression){
   int i = 0, a, b;
+  char * current;
   
-  for(i = 0; i < MAX; i++){
-    char c = expression[i];
-    if(c == '\0')
-      break;
-    
-    else if(c == ' ')
-      continue;
-    
-    else{
-      if(c >= 48 && c <= 57){
-        push(head, c - '0');
-      }
-      
-      else
-        operate(head, c);
-    }
+  current = strtok(expression, " ");
+  while(current != NULL){
+    if(isdigit(*current))
+      push(head, atoi(current));
+  
+    else
+      operate(head, *current);
+
+    current = strtok(NULL, " ");  
   }
 
   return pop(head);
