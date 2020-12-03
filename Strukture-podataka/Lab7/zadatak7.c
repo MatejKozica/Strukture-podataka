@@ -17,7 +17,7 @@ int pop(Position head);
 int printList(Position head);
 int openFile(char * file, char * expression);
 float calculate(Position head, char * expression);
-int operate(Position head, char operation);
+int operation(Position head, char operation);
 
 int main(){
   Position stackHead = (Position)malloc(sizeof(Node));
@@ -75,7 +75,6 @@ int openFile(char * file, char * expression){
 }
 
 float calculate(Position head, char * expression){
-  int i = 0, a, b;
   char * current;
   
   current = strtok(expression, " ");
@@ -84,7 +83,7 @@ float calculate(Position head, char * expression){
       push(head, atoi(current));
   
     else
-      operate(head, *current);
+      operation(head, *current);
 
     current = strtok(NULL, " ");  
   }
@@ -92,7 +91,7 @@ float calculate(Position head, char * expression){
   return pop(head);
 }
 
-int operate(Position head, char c){
+int operation(Position head, char c){
   int a = pop(head);
   int b = pop(head);
   switch (c)

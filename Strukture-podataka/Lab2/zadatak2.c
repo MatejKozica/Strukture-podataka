@@ -191,7 +191,6 @@ int writeIntoFile(char * file, Node * point){
   return 0;
 }
 
-
 int sortList(Node * point){
   Node * pointer;
   Node * beforePointer;
