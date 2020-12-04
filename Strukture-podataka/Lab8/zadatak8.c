@@ -32,10 +32,12 @@ int createChild(Position node, char * name){
     return -1;
   }
 
+  temp->path = (char *)malloc(sizeof(name));
+
   node->firstChild = temp;
   temp->firstChild = NULL;
   temp->nextSibling = NULL;
-  temp->path = name;
+  strcpy(temp->path, name);
 
   return 0;
 }
@@ -46,6 +48,8 @@ int createSibling(Position node, char * name){
     return -1;
   }
   
+  temp->path = (char *)malloc(sizeof(name));
+
   while(node->nextSibling != NULL){
     node = node->nextSibling;
   }
@@ -54,9 +58,9 @@ int createSibling(Position node, char * name){
   node->nextSibling = temp;
 
   temp->firstChild = NULL;
-  temp->path = name;
+  strcpy(temp->path, name);
   return 0;
-}
+} 
 
 int dir(Position node){
   node = node->firstChild;
@@ -79,7 +83,6 @@ int app(){
   current = root;
   char input[MAX];
 
-  
   do{
     printf("\n~/%s/\n", current->path);
     gets(input);
@@ -100,7 +103,6 @@ Position handleInput(Position node, char * input){
 
   command = strtok(input, " ");
   argument = strtok(NULL, "\0");
-  printf("\nCommand: %s \nArgument: %s \n", command, argument);
   
   if(strcmp(command, "md") == 0){
     createChild(node, argument);
@@ -111,5 +113,6 @@ Position handleInput(Position node, char * input){
 
   return node;
 }
+
 
 
