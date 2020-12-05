@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX 50
+#define MAX 100
 
 typedef struct _treeNode * Position;
+typedef struct _stackNode * StackPosition;
 
 typedef struct _treeNode{
   Position firstChild;
@@ -12,16 +13,35 @@ typedef struct _treeNode{
   char * path;
 }TreeNode;
 
+typedef struct _stackNode{
+  Position data;
+  StackPosition next;
+} StackNode;
+
+//Tree functions
 int createChild(Position node, char * name);
 int createSibling(Position node, char * name);
-int cd(Position node, char * name);
-int dir(Position node);
+int hasChild(Position node);
+
+//Stack functions
+int push(StackPosition head, Position node);
+Position pop(StackPosition head);
+int printStack(StackPosition head);
+
+//App functions
+int directory(Position node);
 int app();
-Position handleInput(Position node, char * input);
+Position handleInput(Position node, char * input, StackPosition stack);
+Position changeDirectory(Position node, char * input, StackPosition stack);
+Position changeToPreviousDirectory(StackPosition stack);
+char * generatePath(StackPosition stack);
 
 
 int main(){
   app();
+
+  StackPosition head = (StackPosition)malloc(sizeof(StackNode));
+  head->next = NULL;
 
   return 0;
 }
@@ -72,32 +92,57 @@ int dir(Position node){
   return 0;
 }
 
+int hasChild(Position node){
+  if(node->firstChild != NULL){
+    return 1;
+  }
+  return 0;
+}
+
+Position changeDirectory(Position node, char * name, StackPosition stack){
+  push(stack, node);
+  node = node->firstChild;
+  while(node == NULL || strcmp(node->path, name) != 0){
+    node = node->nextSibling;
+  }
+
+  if(node == NULL){
+    printf("That directory doesn't exist");
+    return NULL;
+  }
+  
+  return node;
+}
+
 int app(){
   Position root = (Position)malloc(sizeof(TreeNode));
   Position current = (Position)malloc(sizeof(TreeNode));
+  StackPosition pathStack  = (StackPosition)malloc(sizeof(StackNode));
   
   root->nextSibling = NULL;
   root->firstChild = NULL;
-  root->path = "root";
+  root->path = "";
+
+  pathStack->next = NULL;
   
   current = root;
   char input[MAX];
 
   do{
-    printf("\n~/%s/\n", current->path);
+    printf("\n~/%s\n", current->path);
     gets(input);
-    current = handleInput(current, input);
+    current = handleInput(current, input, pathStack);
 
-  }while(strcmp(input, "izlaz") != 0);
+  }while(strcmp(input, "exit") != 0);
 
   printf("Goodbye cruel world");
   return 0;
 }
 
-Position handleInput(Position node, char * input){
+Position handleInput(Position node, char * input, StackPosition stack){
   char * command, * argument;
 
-  if(strcmp(input, "izlaz") == 0){
+  if(strcmp(input, "exit") == 0){
     return NULL;
   }
 
@@ -105,14 +150,80 @@ Position handleInput(Position node, char * input){
   argument = strtok(NULL, "\0");
   
   if(strcmp(command, "md") == 0){
-    createChild(node, argument);
+    if(hasChild(node)){
+      createSibling(node->firstChild, argument);
+    }
+    else{
+      createChild(node, argument);
+    }
   }
   else if(strcmp(command, "dir") == 0){
     dir(node);
+  }
+  else if(strcmp(command, "cd") == 0){
+    if(strcmp(argument, "..") == 0){
+      node = changeToPreviousDirectory(stack);
+    } 
+    else if(hasChild(node)){
+      node = changeDirectory(node, argument, stack);
+    }
+    else{
+      printf("Directory is empty");
+    }
+  }
+  else{
+    printf("Command not found");
   }
 
   return node;
 }
 
+int push(StackPosition head, Position node){
+  Position tempData = (Position)malloc(sizeof(TreeNode));
+  StackPosition temp = (StackPosition)malloc(sizeof(StackNode));
+  if(tempData == NULL || temp == NULL){
+    return -1;
+  }
+  
+  tempData->path = (char *)malloc(sizeof(node->path));
+
+  tempData->firstChild = node->firstChild;
+  tempData->nextSibling = node->nextSibling;
+  strcpy(tempData->path, node->path);
+
+  temp->data = tempData;
+  
+  temp->next = head->next;
+  head->next = temp;
+
+  return  0;
+}
+
+Position pop(StackPosition head){
+  Position wantedNode = head->next->data;
+  StackPosition temp;
+  temp = head->next;
+  head->next = temp->next;
+  free(temp);
+  return wantedNode;
+}
+
+Position changeToPreviousDirectory(StackPosition stack){
+  return pop(stack);
+}
 
 
+//implementirati pomoću queuea ili šetanjem kroz stablo
+/* char * generatePath(StackPosition stack){
+  char * path = (char *)malloc(sizeof(char) * MAX);
+  strcpy(path, "~/");
+  
+  while(stack->next != NULL){
+    printf("\nSTACK: %s\n", stack->path);
+    strcat(path, stack->path);
+    strcat(path, "/");
+    pop(stack);
+  }
+
+  return path;
+} */
