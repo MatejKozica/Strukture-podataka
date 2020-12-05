@@ -31,10 +31,10 @@ int printStack(StackPosition head);
 //App functions
 int directory(Position node);
 int app();
-Position handleInput(Position node, char * input, StackPosition stack);
-Position changeDirectory(Position node, char * input, StackPosition stack);
-Position changeToPreviousDirectory(StackPosition stack);
-char * generatePath(StackPosition stack);
+Position handleInput(Position node, char * input, StackPosition stack, char * path);
+Position changeDirectory(Position node, char * input, StackPosition stack, char * path);
+Position changeToPreviousDirectory(StackPosition stack, char * path);
+int generatePath(char * path, Position node);
 
 
 int main(){
@@ -99,9 +99,10 @@ int hasChild(Position node){
   return 0;
 }
 
-Position changeDirectory(Position node, char * name, StackPosition stack){
+Position changeDirectory(Position node, char * name, StackPosition stack, char * path ){
   push(stack, node);
   node = node->firstChild;
+  generatePath(path, node);
   while(node == NULL || strcmp(node->path, name) != 0){
     node = node->nextSibling;
   }
@@ -124,14 +125,17 @@ int app(){
   root->path = "";
 
   pathStack->next = NULL;
+
+  char * path = (char *)malloc(sizeof(char) * MAX);
+  strcpy(path, "");
   
   current = root;
   char input[MAX];
 
   do{
-    printf("\n~/%s\n", current->path);
+    printf("\n~/%s\n", path);
     gets(input);
-    current = handleInput(current, input, pathStack);
+    current = handleInput(current, input, pathStack, path);
 
   }while(strcmp(input, "exit") != 0);
 
@@ -139,7 +143,7 @@ int app(){
   return 0;
 }
 
-Position handleInput(Position node, char * input, StackPosition stack){
+Position handleInput(Position node, char * input, StackPosition stack, char * path){
   char * command, * argument;
 
   if(strcmp(input, "exit") == 0){
@@ -162,10 +166,10 @@ Position handleInput(Position node, char * input, StackPosition stack){
   }
   else if(strcmp(command, "cd") == 0){
     if(strcmp(argument, "..") == 0){
-      node = changeToPreviousDirectory(stack);
+      node = changeToPreviousDirectory(stack, path);
     } 
     else if(hasChild(node)){
-      node = changeDirectory(node, argument, stack);
+      node = changeDirectory(node, argument, stack, path);
     }
     else{
       printf("Directory is empty");
@@ -208,22 +212,18 @@ Position pop(StackPosition head){
   return wantedNode;
 }
 
-Position changeToPreviousDirectory(StackPosition stack){
+Position changeToPreviousDirectory(StackPosition stack, char * path){
+  path = strrev(path);
+  char * temp;
+  temp = strchr(path, '/');
+  *temp = '\0';
+  path = strrev(path);
+
   return pop(stack);
 }
 
-
-//implementirati pomoću queuea ili šetanjem kroz stablo
-/* char * generatePath(StackPosition stack){
-  char * path = (char *)malloc(sizeof(char) * MAX);
-  strcpy(path, "~/");
-  
-  while(stack->next != NULL){
-    printf("\nSTACK: %s\n", stack->path);
-    strcat(path, stack->path);
-    strcat(path, "/");
-    pop(stack);
-  }
-
-  return path;
-} */
+int generatePath(char * name, Position node){
+  strcat(name, node->path);
+  strcat(name, "/");
+  return 0;
+}
