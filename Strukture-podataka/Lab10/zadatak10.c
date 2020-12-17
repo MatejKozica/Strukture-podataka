@@ -156,7 +156,7 @@ int writeInFile(Position point, FILE * output){
     return 1;
   }
   
-  if(*point->data == '*' || *point->data == '/'){
+  if(*point->data == '*' || *point->data == '/' || *point->data == '+' || *point->data == '-'){
     fprintf(output, "(");
     writeInFile(point->leftChild, output);
     fprintf(output, "%s ", point->data);
