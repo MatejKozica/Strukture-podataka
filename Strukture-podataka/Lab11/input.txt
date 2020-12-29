@@ -1,0 +1,4 @@
+Ante Milic 10
+Jure Milic 20
+Jakov Matic 30
+Ante Pelivan 40
