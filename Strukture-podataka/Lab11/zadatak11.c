@@ -4,13 +4,12 @@
 #define MAX 50
 
 typedef struct _node * Position;
-typedef struct _hashTable * HashPos;
+typedef struct _hashTable * HashPosition;
 
 typedef struct _student{
   char name[MAX];
   char surname[MAX];
   int id;
-
 }Student;
 
 typedef struct _node{
@@ -19,90 +18,28 @@ typedef struct _node{
 }Node;
 
 typedef struct _hashTable{
-  int tableSize;
-  Position * hashLists;
+  int size;
+  Position * list;
 }HashTable;
 
-HashPos initialize(int size);
-int add(HashPos table, char * name, char * surname, int id);
-int hash(char * key, int size);
 int printList(Position point);
-int search(HashPos table);
-int insertIntoList(Position head, Position data);
+int sortInput(Position point, char * name, char * surname, int id);
+HashPosition createTable(int size);
+int hash(char * key, int size);
+int add(HashPosition table, char * name, char * surname, int id);
+int search(HashPosition table);
+int printTable(HashPosition table);
 
 int main(){
-  HashPos table = initialize(11);
-  add(table, "Matej", "Kozica", 1);
-  add(table, "Tonino", "Kastelan", 2);
-  add(table, "Ivan", "Tomic", 3);
-  add(table, "Roko", "Radanovic", 4);
-  /* printf("%d", search(table)); */
-
-  int i = 0;
-
-  for(i = 0; i < 11; i++){
-    printf("%d\n", i+1);
-    printList(table->hashLists[i]);
-  }
+  HashPosition table = createTable(11);
+  add(table, "Ivan", "Tomic", 4);
+  add(table, "Roko", "Radanovic", 1);
+  add(table, "Matej", "Kozica", 2);
+  add(table, "Tonino", "Kastelan", 3);
+  printf("%d\n", search(table));
+  printTable(table);
 
   return 0;
-}
-
-HashPos initialize(int size){
-  HashPos temp = (HashPos)malloc(sizeof(HashTable));
-  int i = 0;
-  
-  if(temp == NULL){
-    return NULL;
-  }
-
-  temp->tableSize = size;
-  temp->hashLists = (Position *)malloc(sizeof(Position)*temp->tableSize);
-  if(temp->hashLists == NULL){
-    return NULL;
-  }
-
-  for(i = 0; i < temp->tableSize; i++){
-    temp->hashLists[i] = NULL;
-  }
-
-  return temp;
-}
-
-int add(HashPos table, char * name, char * surname, int id){
-  Position temp = (Position)malloc(sizeof(Node));
-  int index = hash(surname, table->tableSize);
-  
-  if(temp == NULL){
-    return 1;
-  }
-
-  temp->data.id = id;
-  strcpy(temp->data.name, name);
-  strcpy(temp->data.surname, surname);
-
-/*   insertIntoList(table->hashLists[index], temp); */
-
-
-  temp->next = table->hashLists[index];
-  table->hashLists[index] = temp;
-  return 0;
-}
-
-int insertIntoList(Position head, Position data){
-  data->next = head;
-  head = data;
-
-  return 0;
-}
-
-int hash(char * key, int size){
-  int a = 0, i = 0;
-  for(i = 0; i<5;i++){
-    a += key[i];
-  }
-
-  return a % size;
 }
 
 int printList(Position point){
@@ -111,22 +48,92 @@ int printList(Position point){
   }
   
   while(point != NULL){
-    printf("%-15s %-15s %d\n", point->data.name, point->data.surname, point->data.id);
+    printf("%-15s %-15s %d\n", point->data.surname, point->data.name, point->data.id);
     point = point->next;
   }
   printf("\n");
+
   return 0;
 }
 
-int search(HashPos table){
-  char name[MAX];
-  char surname[MAX];
+int sortInput(Position point, char * name, char * surname, int id){
   Position temp = (Position)malloc(sizeof(Node));
 
+  if(temp == NULL){
+    return 1;
+  }
+
+  if(point == NULL){
+    printf("Invalid head");
+    return 1;
+  }
+  
+  temp->data.id = id;
+  strcpy(temp->data.name, name);
+  strcpy(temp->data.surname, surname);
+
+  while(point->next != NULL && 
+        (strcmp(surname, point->next->data.surname) > 0 || (strcmp(surname, point->next->data.surname) == 0 && strcmp(name, point->next->data.name) > 0)))
+  {
+    point = point->next;
+  }
+
+  temp->next = point->next;
+  point->next = temp;
+
+  return 0;
+}
+
+HashPosition createTable(int size){
+  HashPosition temp = (HashPosition)malloc(sizeof(HashTable));
+  temp->size = size;
+
+  if(temp == NULL){
+    return NULL;
+  }
+
+  temp->list = (Position *)malloc(sizeof(Position)*size);
+
+  if(temp->list == NULL){
+    return NULL;
+  }
+
+  int i = 0;
+
+  for(i = 0; i < size; i++){
+    temp->list[i] = (Position)malloc(sizeof(Node));
+    temp->list[i]->next = NULL;
+  }
+
+  return temp;
+}
+
+int hash(char * key, int size){
+  int a = 0, i = 0;
+  for(i = 0; i < 5; i++){
+    a += key[i];
+  }
+
+  return a % size;
+}
+
+int add(HashPosition table, char * name, char * surname, int id){
+  int index = hash(surname, table->size);
+  sortInput(table->list[index], name, surname, id);
+
+  return 0;
+}
+
+int search(HashPosition table){
+  char name[MAX];
+  char surname[MAX];
+  
   printf("Unesite ime i prezime: ");
   scanf("%s %s", name, surname);
-  int index = hash(surname, table->tableSize);
-  temp = table->hashLists[index];
+
+  int index = hash(surname, table->size);
+
+  Position temp = table->list[index];
 
   while(temp != NULL){
     if(strcmp(temp->data.name, name) == 0 && strcmp(temp->data.surname, surname) == 0){
@@ -135,5 +142,16 @@ int search(HashPos table){
     temp = temp->next;
   }
   
+  return 0;
+}
+
+int printTable(HashPosition table){
+  int i = 0;
+
+  for(i = 0; i < table->size; i++){
+    printf("%d\n", i+1);
+    printList(table->list[i]->next);
+  }
+
   return 0;
 }
