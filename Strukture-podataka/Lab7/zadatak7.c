@@ -26,7 +26,6 @@ int main(){
   openFile("input.txt", expression);
   printf("%0.1f", calculate(stackHead, expression));
 
-
   return 0;
 }
 

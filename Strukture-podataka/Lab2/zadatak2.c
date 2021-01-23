@@ -43,6 +43,7 @@ int main(){
   printList(head->next);
 
   freeList(head);
+  printList(head->next);
   return 0;
 }
 
